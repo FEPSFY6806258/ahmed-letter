@@ -76,17 +76,11 @@
     transition: opacity .8s ease, transform .8s ease;
   }
   .letter.show { opacity: 1; transform: none; }
-  .eyebrow { font-family: 'Dancing Script', cursive; color: #b0607a; font-size: 1.4rem; margin-bottom: 4px; }
-  .letter h1 { font-family: 'Dancing Script', cursive; font-size: 2.6rem; color: var(--accent); margin-bottom: 18px; }
-  .letter .body { font-size: 1.25rem; line-height: 1.65; white-space: pre-wrap; min-height: 1em; }
-  .cursor::after { content: '|'; color: var(--accent); animation: blink 1s step-end infinite; }
-  @keyframes blink { 50% { opacity: 0; } }
-  .sign { font-family: 'Dancing Script', cursive; font-size: 1.9rem; text-align: right; margin-top: 26px; opacity: 0; transition: opacity 1.2s; }
-  .sign span { display: block; font-size: 1.3rem; color: #8a5a66; }
-  .skip { text-align: center; font-style: italic; font-size: .95rem; color: #a07c86; margin-top: 18px; }
+
+  .title { font-family: 'Dancing Script', cursive; font-size: 2.5rem; line-height: 1.15; color: var(--accent); text-align: center; margin-bottom: 8px; }
 
   /* Photos */
-  .extras { display: none; opacity: 0; transition: opacity 1s ease; margin-top: 30px; }
+  .extras { display: none; opacity: 0; transition: opacity 1s ease; margin-top: 10px; }
   .extras.show { opacity: 1; }
   .polaroids { display: flex; flex-wrap: wrap; gap: 22px; justify-content: center; align-items: center; margin: 10px 0 30px; }
   .polaroid {
@@ -132,8 +126,7 @@
 
   @media (max-width: 480px) {
     .letter { padding: 28px 20px; }
-    .letter h1 { font-size: 2.2rem; }
-    .letter .body { font-size: 1.12rem; }
+    .title { font-size: 2.1rem; }
   }
 </style>
 </head>
@@ -154,11 +147,7 @@
 </div>
 
 <article class="letter" id="letter">
-  <p class="eyebrow">Happy 2 year anniversary</p>
-  <h1 id="greeting"></h1>
-  <p class="body cursor" id="body"></p>
-  <p class="sign" id="sign"></p>
-  <p class="skip" id="skip">tap the letter to skip ahead</p>
+  <h1 class="title">Happy 2 year anniversary, Ahmed ♥</h1>
 
   <section class="extras" id="extras">
     <div class="polaroids">
@@ -181,30 +170,16 @@
 
 <script>
   /* ============================================
-     ✏️  EDIT THIS PART — names and message
+     ✏️  EDIT THIS PART
      ============================================ */
   const CONFIG = {
-    to: "Ahmed",
-    from: "me",
-    closing: "Love you more,",
-    message: [
-      "I know this is just the day we actually met, and our anniversary isn't till February, but again it's gonna be Ramadan, so I've just claimed now as our anniversary.",
-      "I know I don't say this enough, but I appreciate you so much. I appreciate every little thing, every good morning, every call.",
-      "I won't do my usual paragraph, you've probably gotten enough of them, but I love you so so much. Mwah mwah 😘"
-    ],
-    scareDelay: 4000   // ms after the letter finishes before the jump scare
+    scareDelay: 6000   // ms after the envelope opens before the jump scare
   };
   /* ============================================ */
 
-  const chars = Array.from(CONFIG.message.join("\n\n"));
   const $ = id => document.getElementById(id);
   const envelope = $('envelope'), stage = $('stage'), letter = $('letter');
-  const bodyEl = $('body'), signEl = $('sign'), skipEl = $('skip'), extras = $('extras'), scare = $('scare');
-
-  $('greeting').textContent = "Dear " + CONFIG.to + ",";
-  signEl.innerHTML = "<span></span>";
-  signEl.querySelector('span').textContent = CONFIG.closing;
-  signEl.append(CONFIG.from + " ♥");
+  const extras = $('extras'), scare = $('scare');
 
   // Floating hearts
   const heartsLayer = $('hearts');
@@ -265,34 +240,6 @@
   scare.addEventListener('click', () => { scare.classList.remove('on'); burst(25); });
   $('dont').addEventListener('click', e => { e.stopPropagation(); jumpScare(); });
 
-  // Typewriter
-  let i = 0, done = false;
-  function typeNext() {
-    if (done) return;
-    if (i < chars.length) {
-      i++;
-      bodyEl.textContent = chars.slice(0, i).join('');
-      const c = chars[i - 1];
-      const delay = c === '\n' ? 220 : (c === '.' || c === ',') ? 260 : 38;
-      setTimeout(typeNext, delay);
-    } else {
-      finish();
-    }
-  }
-  function finish() {
-    if (done) return;
-    done = true;
-    bodyEl.textContent = chars.join('');
-    bodyEl.classList.remove('cursor');
-    signEl.style.opacity = 1;
-    skipEl.style.display = 'none';
-    extras.style.display = 'block';
-    requestAnimationFrame(() => requestAnimationFrame(() => extras.classList.add('show')));
-    burst(35);
-    if (!scared) { scared = true; setTimeout(jumpScare, CONFIG.scareDelay); }
-  }
-  letter.addEventListener('click', finish);
-
   // Open the envelope
   function openEnvelope() {
     if (envelope.classList.contains('open')) return;
@@ -303,8 +250,13 @@
     setTimeout(() => {
       stage.style.display = 'none';
       letter.style.display = 'block';
-      requestAnimationFrame(() => requestAnimationFrame(() => letter.classList.add('show')));
-      setTimeout(typeNext, 800);
+      extras.style.display = 'block';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        letter.classList.add('show');
+        extras.classList.add('show');
+      }));
+      burst(35);
+      if (!scared) { scared = true; setTimeout(jumpScare, CONFIG.scareDelay); }
     }, 1500);
   }
   envelope.addEventListener('click', openEnvelope);
